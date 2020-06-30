@@ -36,6 +36,7 @@
 
 namespace Fabiang\Xmpp\Stream;
 
+use Fabiang\Xmpp\Connection\AbstractConnection;
 use Fabiang\Xmpp\Event\EventManagerAwareInterface;
 use Fabiang\Xmpp\Event\EventManagerInterface;
 use Fabiang\Xmpp\Event\EventManager;
@@ -52,6 +53,13 @@ class XMLStream implements EventManagerAwareInterface
 {
 
     const NAMESPACE_SEPARATOR = ':';
+
+    /**
+     * Connection for logging.
+     *
+     * @var AbstractConnection
+     */
+    protected $connection;
 
     /**
      * Eventmanager.
@@ -143,6 +151,18 @@ class XMLStream implements EventManagerAwareInterface
     public function __destruct()
     {
         xml_parser_free($this->parser);
+    }
+
+    /**
+     * Set the connection.
+     *
+     * @param AbstractConnection $connection
+     * @return \Fabiang\Xmpp\Stream\XMLStream
+     */
+    public function setConnection($connection)
+    {
+        $this->connection = $connection;
+        return $this;
     }
 
     /**

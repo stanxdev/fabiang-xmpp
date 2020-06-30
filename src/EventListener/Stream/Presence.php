@@ -34,55 +34,80 @@
  * @link      http://github.com/fabiang/xmpp
  */
 
-namespace Fabiang\Xmpp\Protocol;
+namespace Fabiang\Xmpp\EventListener\Stream;
 
-use Fabiang\Xmpp\Util\XML;
+use Fabiang\Xmpp\Event\XMLEvent;
+use Fabiang\Xmpp\EventListener\AbstractEventListener;
+use Fabiang\Xmpp\EventListener\BlockingEventListenerInterface;
+use Fabiang\Xmpp\Protocol\Presence as PresenceProtocol;
 
 /**
- * Protocol setting for Xmpp.
+ * Listener
  *
- * @package Xmpp\Protocol
+ * @package Xmpp\EventListener
  */
-class UnblockUser extends Protocol
+class Presence extends AbstractEventListener implements BlockingEventListenerInterface
 {
+    /**
+     * Blocking.
+     *
+     * @var boolean
+     */
+    protected $blocking = false;
 
-	// the jid of the user to block
-	protected $accountjid;
     /**
      * {@inheritDoc}
      */
-    public function toString()
+    public function attachEvents()
     {
-        return XML::quoteMessage(
-            '<iq type="set" id="%s">
-                <unblock xmlns="urn:xmpp:blocking">
-                    <item jid="%s"/>
-                </unblock>
-            </iq>',
-            $this->getId(),
-            $this->getJabberID()
-        );
+        $output = $this->getOutputEventManager();
+        $output->attach('{jabber:client}presence',  [$this, 'query']);
+        $input =  $this->getInputEventManager();
+        $input->attach('{jabber:client}presence',  [$this, 'result']);
     }
 
     /**
-     * Get JabberID.
+     * Sending a query request for roster sets listener to blocking mode.
      *
-     * @return string
+     * @return void
      */
-    public function getJabberID()
+    public function query()
     {
-        return $this->accountjid;
+        $this->blocking = true;
     }
 
     /**
-     * Set abberID.
+     * Result received.
      *
-     * @param string $nickname
-     * @return $this
+     * @param \Fabiang\Xmpp\Event\XMLEvent $event
+     * @return void
      */
-    public function setJabberID($accountjid)
+    public function result(XMLEvent $event)
     {
-        $this->accountjid = (string) $accountjid;
-        return $this;
+        if ($event->isEndTag()) {
+            /** @var \DOMElement $element */
+            $element = $event->getParameter(0);
+            /** @var PresenceProtocol $protocol */
+            if ($protocol = $this->getOptions()->getLastSentProtocol(PresenceProtocol::class)) {
+                if ($element->hasAttribute('type') && PresenceProtocol::TYPE_ERROR == $element->getAttribute('type')) {
+                    foreach ($element->childNodes as $node) {
+                        if ('error' == $node->nodeName) {
+                            $protocol->setResult($node->nodeValue);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            $this->blocking = false;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isBlocking()
+    {
+        return $this->blocking;
     }
 }

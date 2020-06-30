@@ -39,50 +39,27 @@ namespace Fabiang\Xmpp\Protocol;
 use Fabiang\Xmpp\Util\XML;
 
 /**
- * Protocol setting for Xmpp.
+ * Base protocol for Xmpp.
  *
  * @package Xmpp\Protocol
  */
-class UnblockUser extends Protocol
+abstract class Protocol implements ProtocolImplementationInterface
 {
-
-	// the jid of the user to block
-	protected $accountjid;
     /**
-     * {@inheritDoc}
+     * @var string
      */
-    public function toString()
-    {
-        return XML::quoteMessage(
-            '<iq type="set" id="%s">
-                <unblock xmlns="urn:xmpp:blocking">
-                    <item jid="%s"/>
-                </unblock>
-            </iq>',
-            $this->getId(),
-            $this->getJabberID()
-        );
-    }
+    protected $id = null;
 
     /**
-     * Get JabberID.
+     * Get protocol id.
      *
      * @return string
      */
-    public function getJabberID()
+    public function getId()
     {
-        return $this->accountjid;
-    }
-
-    /**
-     * Set abberID.
-     *
-     * @param string $nickname
-     * @return $this
-     */
-    public function setJabberID($accountjid)
-    {
-        $this->accountjid = (string) $accountjid;
-        return $this;
+        if (null == $this->id) {
+            $this->id = XML::generateId();
+        }
+        return $this->id;
     }
 }

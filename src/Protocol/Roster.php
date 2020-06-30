@@ -36,14 +36,12 @@
 
 namespace Fabiang\Xmpp\Protocol;
 
-use Fabiang\Xmpp\Util\XML;
-
 /**
  * Protocol setting for Xmpp.
  *
  * @package Xmpp\Protocol
  */
-class Roster implements ProtocolImplementationInterface
+class Roster extends Protocol
 {
 
     /**
@@ -51,6 +49,6 @@ class Roster implements ProtocolImplementationInterface
      */
     public function toString()
     {
-        return '<iq type="get" id="' . XML::generateId() . '"><query xmlns="jabber:iq:roster"/></iq>';
+        return '<iq type="get" id="' . $this->getId() . '"><query xmlns="jabber:iq:roster"/></iq>';
     }
 }

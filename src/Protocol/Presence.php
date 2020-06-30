@@ -43,12 +43,11 @@ use Fabiang\Xmpp\Util\XML;
  *
  * @package Xmpp\Protocol
  */
-class Presence implements ProtocolImplementationInterface
+class Presence extends Protocol
 {
     /**
      * Signals that the entity is available for communication.
      */
-
     const TYPE_AVAILABLE = 'available';
 
     /**
@@ -138,6 +137,13 @@ class Presence implements ProtocolImplementationInterface
      * @var string
      */
     protected $password;
+
+    /**
+     * Presence result.
+     *
+     * @var string
+     */
+    protected $result = null;
 
     /**
      * Constructor.
@@ -241,7 +247,7 @@ class Presence implements ProtocolImplementationInterface
     /**
      * Get channel password.
      *
-     * @return string¦null
+     * @return string|null
      */
     public function getPassword()
     {
@@ -257,6 +263,28 @@ class Presence implements ProtocolImplementationInterface
     public function setPassword($password = null)
     {
         $this->password = $password;
+        return $this;
+    }
+
+    /**
+     * Get presence result.
+     *
+     * @return string
+     */
+    public function getResult()
+    {
+        return $this->result;
+    }
+
+    /**
+     * Set presence result.
+     *
+     * @param string $result
+     * @return \Fabiang\Xmpp\Protocol\Presence
+     */
+    public function setResult($result)
+    {
+        $this->result = $result;
         return $this;
     }
 }

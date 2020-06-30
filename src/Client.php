@@ -144,6 +144,7 @@ class Client implements EventManagerAwareInterface
      */
     public function send(ProtocolImplementationInterface $interface)
     {
+        $this->options->addSentProtocol($interface);
         $data = $interface->toString();
         $this->connection->send($data);
     }

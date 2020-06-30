@@ -36,14 +36,12 @@
 
 namespace Fabiang\Xmpp\Protocol;
 
-use Fabiang\Xmpp\Util\XML;
-
 /**
  * Protocol setting for Xmpp.
  *
  * @package Xmpp\Protocol
  */
-class BlockUser implements ProtocolImplementationInterface
+class BlockUser extends Protocol
 {
     protected $from;
 
@@ -62,7 +60,7 @@ class BlockUser implements ProtocolImplementationInterface
                 </block>
             </iq>',
             $this->getFrom(),
-            XML::generateId(),
+            $this->getId(),
             $this->getJabberID()
         );
     }

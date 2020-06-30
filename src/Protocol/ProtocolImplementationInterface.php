@@ -45,6 +45,13 @@ interface ProtocolImplementationInterface
 {
 
     /**
+     * Get the id of the data being sent.
+     *
+     * @return string
+     */
+    public function getId();
+
+    /**
      * Protocol implementations should be turned into an string.
      *
      * @return string

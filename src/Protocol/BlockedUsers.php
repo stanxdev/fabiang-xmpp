@@ -36,14 +36,12 @@
 
 namespace Fabiang\Xmpp\Protocol;
 
-use Fabiang\Xmpp\Util\XML;
-
 /**
  * Protocol setting for Xmpp.
  *
  * @package Xmpp\Protocol
  */
-class BlockedUsers implements ProtocolImplementationInterface
+class BlockedUsers extends Protocol
 {
 
     /**
@@ -51,7 +49,7 @@ class BlockedUsers implements ProtocolImplementationInterface
      */
     public function toString()
     {
-        return '<iq type="get" id="' . XML::generateId() . '">'
+        return '<iq type="get" id="' . $this->getId() . '">'
             . '<blocklist xmlns="urn:xmpp:blocking"/></iq>';
     }
 }

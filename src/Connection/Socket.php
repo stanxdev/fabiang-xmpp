@@ -74,11 +74,12 @@ XML;
     /**
      * Constructor set default socket instance if no socket was given.
      *
-     * @param StreamSocket $socket  Socket instance
+     * @param Options $options Options object
      */
-    public function __construct(SocketClient $socket)
+    public function __construct(Options $options)
     {
-        $this->setSocket($socket);
+        $this->options = $options;
+        $this->socket = new SocketClient($options->getAddress(), $options->getContextOptions());
     }
 
     /**
@@ -89,9 +90,7 @@ XML;
      */
     public static function factory(Options $options)
     {
-        $socket = new SocketClient($options->getAddress(), $options->getContextOptions());
-        $object = new static($socket);
-        $object->setOptions($options);
+        $object = new static($options);
         return $object;
     }
 
@@ -138,7 +137,7 @@ XML;
                 $address = 'tls://' . $matches['address'];
                 $this->connected = false;
                 $this->getOptions()->setAddress($address);
-                $this->getSocket()->reconnect($address);
+                $this->getSocket()->reconnect($address, $this->getOptions()->getTimeout(), $this->getOptions()->isPersistent());
                 $this->connect();
                 return;
             }
@@ -173,7 +172,7 @@ XML;
     {
         if (false === $this->connected) {
             $address = $this->getAddress();
-            $this->getSocket()->connect($this->getOptions()->getTimeout());
+            $this->getSocket()->connect($this->getOptions()->getTimeout(), $this->getOptions()->isPersistent());
             $this->getSocket()->setBlocking(true);
 
             $this->connected = true;
@@ -189,7 +188,7 @@ XML;
     public function disconnect()
     {
         if (true === $this->connected) {
-            $address         = $this->getAddress();
+            $address = $this->getAddress();
             $this->send(static::STREAM_END);
             $this->getSocket()->close();
             $this->connected = false;

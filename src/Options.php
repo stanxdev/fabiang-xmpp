@@ -39,6 +39,7 @@ namespace Fabiang\Xmpp;
 use Fabiang\Xmpp\Connection\ConnectionInterface;
 use Fabiang\Xmpp\Protocol\ImplementationInterface;
 use Fabiang\Xmpp\Protocol\DefaultImplementation;
+use Fabiang\Xmpp\Protocol\ProtocolImplementationInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -125,6 +126,20 @@ class Options
     protected $timeout = 30;
 
     /**
+     * Is connection persistent.
+     *
+     * @var bool
+     */
+    protected $persistent = false;
+
+    /**
+     * Prefered authentication method.
+     *
+     * @var string
+     */
+    protected $authentication = null;
+
+    /**
      * Authentication methods.
      *
      * @var array
@@ -142,6 +157,14 @@ class Options
      * @var array
      */
     protected $contextOptions = [];
+
+
+    /**
+     * Sent protocols
+     *
+     * @var array
+     */
+    protected $protocols = [];
 
 
     /**
@@ -422,6 +445,28 @@ class Options
     }
 
     /**
+     * Get prefered authentication method.
+     *
+     * @return string
+     */
+    public function getAuthentication()
+    {
+        return $this->authentication;
+    }
+
+    /**
+     * Set prefered authentication method.
+     *
+     * @param string $authentication
+     * @return $this
+     */
+    public function setAuthentication($authentication)
+    {
+        $this->authentication = $authentication;
+        return $this;
+    }
+
+    /**
      * Get authentication classes.
      *
      * @return array
@@ -465,6 +510,28 @@ class Options
     }
 
     /**
+     * Get if connection is persistent.
+     *
+     * @return bool
+     */
+    public function isPersistent()
+    {
+        return $this->persistent;
+    }
+
+    /**
+     * Set connection persistent state.
+     *
+     * @param bool $persistent State
+     * @return \Fabiang\Xmpp\Options
+     */
+    public function setPersistent($persistent)
+    {
+        $this->persistent = (bool) $persistent;
+        return $this;
+    }
+
+    /**
      * Get context options for connection
      *
      * @return array
@@ -484,5 +551,47 @@ class Options
     {
         $this->contextOptions = (array) $contextOptions;
         return $this;
+    }
+
+    /**
+     * Add protocol already sent.
+     *
+     * @param ProtocolImplementationInterface $protocol
+     * @return \Fabiang\Xmpp\Options
+     */
+    public function addSentProtocol(ProtocolImplementationInterface $protocol)
+    {
+        $this->protocols[] = $protocol;
+        return $this;
+    }
+
+    /**
+     * Get last sent protocol.
+     *
+     * @param string $class
+     * @return ProtocolImplementationInterface
+     */
+    public function getLastSentProtocol($class)
+    {
+        for ($i = count($this->protocols) - 1; $i >= 0; $i--) {
+            if ($this->protocols[$i] instanceof $class) {
+                return $this->protocols[$i];
+            }
+        }
+    }
+
+    /**
+     * Get last sent protocol matched its id.
+     *
+     * @param string $id
+     * @return ProtocolImplementationInterface
+     */
+    public function getLastSentProtocolMatchedId($id)
+    {
+        for ($i = count($this->protocols) - 1; $i >= 0; $i--) {
+            if ($id == $this->protocols[$i]->getId()) {
+                return $this->protocols[$i];
+            }
+        }
     }
 }

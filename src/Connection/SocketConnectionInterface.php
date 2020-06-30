@@ -47,6 +47,13 @@ interface SocketConnectionInterface
 {
 
     /**
+     * Get socket instance.
+     *
+     * @return SocketClient
+     */
+    public function getSocket();
+
+    /**
      * Set socket instance.
      *
      * @param SocketClient $socket

@@ -128,10 +128,17 @@ class Authentication extends AbstractEventListener implements BlockingEventListe
         $authenticationClass = null;
 
         $authenticationClasses = $this->getOptions()->getAuthenticationClasses();
-        foreach ($this->mechanisms as $mechanism) {
-            if (array_key_exists($mechanism, $authenticationClasses)) {
-                $authenticationClass = $authenticationClasses[$mechanism];
-                break;
+        if ($prefAuth = $this->getOptions()->getAuthentication()) {
+            if (in_array($prefAuth, $this->mechanisms) && array_key_exists($prefAuth, $authenticationClasses)) {
+              $authenticationClass = $authenticationClasses[$prefAuth];
+            }
+        }
+        if (null === $authenticationClass) {
+            foreach ($this->mechanisms as $mechanism) {
+                if (array_key_exists($mechanism, $authenticationClasses)) {
+                    $authenticationClass = $authenticationClasses[$mechanism];
+                    break;
+                }
             }
         }
 

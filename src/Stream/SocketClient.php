@@ -63,21 +63,20 @@ class SocketClient
      */
     protected $address;
 
-
     /**
      * Options used to create a stream context
      * @see http://php.net/manual/en/function.stream-context-create.php
      *
      * @var array
      */
-    protected $options;
+    protected $options = [];
 
     /**
      * Constructor takes address as argument.
      *
      * @param string $address
      */
-    public function __construct($address, $options = null)
+    public function __construct($address, $options = [])
     {
         $this->address = $address;
         $this->options = $options;
@@ -100,11 +99,11 @@ class SocketClient
 
         // call stream_socket_client with custom error handler enabled
         $handler = new ErrorHandler(
-            function ($address, $timeout, $flags, array $options = null) {
+            function ($address, $timeout, $flags, $options = []) {
                 $errno  = null;
                 $errstr = null;
 
-                if (!empty($options)) {
+                if (count($options)) {
                     $context = stream_context_create($options);
                     return stream_socket_client($address, $errno, $errstr, $timeout, $flags, $context);
                 }

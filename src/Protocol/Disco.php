@@ -36,94 +36,64 @@
 
 namespace Fabiang\Xmpp\Protocol;
 
-use Fabiang\Xmpp\Util\XML;
-
 /**
  * Protocol setting for Xmpp.
  *
  * @package Xmpp\Protocol
  */
-class Message extends Protocol
+class Disco extends Protocol
 {
     /**
-     * Chat between to users.
+     * Info discovery.
      */
-    const TYPE_CHAT = 'chat';
+    const INFO = 'info';
 
     /**
-     * Chat in a multi-user channel (MUC).
+     * Items discovery.
      */
-    const TYPE_GROUPCHAT = 'groupchat';
+    const ITEMS = 'items';
 
     /**
-     * Message type.
+     * Discovery type.
      *
      * @var string
      */
-    protected $type = self::TYPE_CHAT;
+    protected $type = self::ITEMS;
 
     /**
-     * Set message receiver.
+     * Set disco receiver.
      *
      * @var string
      */
     protected $to;
 
     /**
-     * Message.
+     * Discovered identity.
      *
-     * @var string
+     * @var \stdClass
      */
-    protected $message = '';
+    protected $identity = null;
 
     /**
-     * Constructor.
+     * Discovered items.
      *
-     * @param string $message
-     * @param string $to
-     * @param string $type
+     * @var array
      */
-    public function __construct($message = '', $to = '', $type = self::TYPE_CHAT)
-    {
-        $this->setMessage($message)->setTo($to)->setType($type);
-    }
+    protected $items = [];
 
     /**
-     * {@inheritDoc}
+     * Discovered features.
+     *
+     * @var array
      */
-    public function toString()
-    {
-        return XML::quoteMessage(
-            '<message type="%s" id="%s" to="%s"><body>%s</body></message>',
-            $this->getType(),
-            $this->getId(),
-            $this->getTo(),
-            $this->getMessage()
-        );
-    }
+    protected $features = [];
 
-    /**
-     * Get message type.
-     *
-     * @return string
-     */
-    public function getType()
+    public function __construct($to = null, $type = null)
     {
-        return $this->type;
-    }
-
-    /**
-     * Set message type.
-     *
-     * See {@link self::TYPE_CHAT} and {@link self::TYPE_GROUPCHAT}
-     *
-     * @param string $type
-     * @return $this
-     */
-    public function setType($type)
-    {
-        $this->type = $type;
-        return $this;
+        $this->setTo($to);
+        if (null !== $type) {
+            $this->setType($type);
+        }
     }
 
     /**
@@ -149,24 +119,98 @@ class Message extends Protocol
     }
 
     /**
-     * Get message.
+     * Get discovery type.
      *
      * @return string
      */
-    public function getMessage()
+    public function getType()
     {
-        return $this->message;
+        return $this->type;
     }
 
     /**
-     * Set message.
+     * Set dicovery type.
      *
-     * @param string $message
+     * @param string $type
      * @return $this
      */
-    public function setMessage($message)
+    public function setType($type)
     {
-        $this->message = (string) $message;
+        $this->type = (string) $type;
         return $this;
+    }
+
+    /**
+     * Add discovered item.
+     *
+     * @param \stdClass $item
+     * @return \Fabiang\Xmpp\Protocol\Disco
+     */
+    public function addItem($item)
+    {
+        $this->items[] = $item;
+        return $this;
+    }
+
+    /**
+     * Get discovered items.
+     *
+     * @return array
+     */
+    public function getItems()
+    {
+        return $this->items;
+    }
+
+    /**
+     * Add discovered feature.
+     *
+     * @param string $feature
+     * @return \Fabiang\Xmpp\Protocol\Disco
+     */
+    public function addFeature($feature)
+    {
+        $this->features[] = $feature;
+        return $this;
+    }
+
+    /**
+     * Get discovered features.
+     *
+     * @return array
+     */
+    public function getFeatures()
+    {
+        return $this->features;
+    }
+
+    /**
+     * Set discovered identity.
+     *
+     * @param \stdClass $identity
+     * @return \Fabiang\Xmpp\Protocol\Disco
+     */
+    public function setIdentity($identity)
+    {
+        $this->identity = $identity;
+        return $this;
+    }
+
+    /**
+     * Get discovered identity.
+     *
+     * @return stdClass
+     */
+    public function getIdentity()
+    {
+        return $this->identity;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function toString()
+    {
+        return '<iq to="' . $this->to . '" type="get" id="' . $this->getId() . '"><query xmlns="http://jabber.org/protocol/disco#' . $this->type . '"/></iq>';
     }
 }

@@ -122,6 +122,7 @@ abstract class AbstractConnection implements ConnectionInterface
     {
         if (null === $this->outputStream) {
             $this->outputStream = new XMLStream();
+            $this->outputStream->setConnection($this);
         }
 
         return $this->outputStream;
@@ -134,6 +135,7 @@ abstract class AbstractConnection implements ConnectionInterface
     {
         if (null === $this->inputStream) {
             $this->inputStream = new XMLStream();
+            $this->inputStream->setConnection($this);
         }
 
         return $this->inputStream;
@@ -257,7 +259,7 @@ abstract class AbstractConnection implements ConnectionInterface
      * @param integer $level   Log level
      * @return void
      */
-    protected function log($message, $level = LogLevel::DEBUG)
+    public function log($message, $level = LogLevel::DEBUG)
     {
         $this->getEventManager()->trigger('logger', $this, [$message, $level]);
     }

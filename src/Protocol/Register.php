@@ -9,7 +9,7 @@ use Fabiang\Xmpp\Util\XML;
  *
  * @package Xmpp\Protocol
  */
-class Register implements ProtocolImplementationInterface
+class Register extends Protocol
 {
 
     protected $to;
@@ -51,7 +51,7 @@ class Register implements ProtocolImplementationInterface
                     <command xmlns='http://jabber.org/protocol/commands' action='execute' node='http://jabber.org/protocol/admin#add-user'/>
                 </iq>",
                 $this->getFrom(),
-                XML::generateId(),
+                $this->getId(),
                 $this->getTo()
             );
         }
@@ -77,7 +77,7 @@ class Register implements ProtocolImplementationInterface
                     </command>
                 </iq>",
                 $this->getFrom(),
-                XML::generateId(),
+                $this->getId(),
                 $this->getTo(),
                 $this->getSID(),
                 $this->getJabberID(),

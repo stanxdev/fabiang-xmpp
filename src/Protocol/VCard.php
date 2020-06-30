@@ -9,7 +9,7 @@ use Fabiang\Xmpp\Util\XML;
  *
  * @package Xmpp\Protocol
  */
-class VCard implements ProtocolImplementationInterface
+class VCard extends Protocol
 {
 
     /**
@@ -63,7 +63,7 @@ class VCard implements ProtocolImplementationInterface
     {
 
          return XML::quoteMessage(
-            '<iq id="' . XML::generateId() . '" type="set">
+            '<iq id="' . $this->getId() . '" type="set">
               <vCard xmlns="vcard-temp">
                 <FN>%s</FN>
                 <N>

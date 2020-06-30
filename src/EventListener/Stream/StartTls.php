@@ -40,6 +40,8 @@ use Fabiang\Xmpp\Event\XMLEvent;
 use Fabiang\Xmpp\EventListener\AbstractEventListener;
 use Fabiang\Xmpp\EventListener\BlockingEventListenerInterface;
 use Fabiang\Xmpp\Connection\SocketConnectionInterface;
+use Fabiang\Xmpp\Exception\Stream\StreamErrorException;
+use Fabiang\Xmpp\Exception\SocketException;
 
 /**
  * Listener
@@ -64,6 +66,7 @@ class StartTls extends AbstractEventListener implements BlockingEventListenerInt
         $input = $this->getInputEventManager();
         $input->attach('{urn:ietf:params:xml:ns:xmpp-tls}starttls', [$this, 'starttlsEvent']);
         $input->attach('{urn:ietf:params:xml:ns:xmpp-tls}proceed', [$this, 'proceed']);
+        $input->attach('{urn:ietf:params:xml:ns:xmpp-tls}failure', [$this, 'failure']);
     }
 
     /**
@@ -73,10 +76,10 @@ class StartTls extends AbstractEventListener implements BlockingEventListenerInt
      */
     public function starttlsEvent(XMLEvent $event)
     {
-        if (false === $event->isStartTag()) {
+        $connection = $this->getConnection();
+        if (!$connection->getOptions()->isAuthenticated() && false === $event->isStartTag()) {
             $this->blocking = true;
 
-            $connection = $this->getConnection();
             $connection->setReady(false);
             $connection->send('<starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls"/>');
         }
@@ -93,12 +96,36 @@ class StartTls extends AbstractEventListener implements BlockingEventListenerInt
         if (false === $event->isStartTag()) {
             $this->blocking = false;
 
+            $res = null;
             $connection = $this->getConnection();
             if ($connection instanceof SocketConnectionInterface) {
-                $connection->getSocket()->crypto(true, STREAM_CRYPTO_METHOD_SSLv23_CLIENT);
+                foreach ([STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT] as $crypt) {
+                    $res = $connection->getSocket()->crypto(true, $crypt);
+                    $params = stream_context_get_params($connection->getSocket()->getResource());
+                    $connection->log('Context parameters "'.var_export($params, true).'".');
+                    if (false === $res) {
+                        throw new SocketException('Unable to activate secure connection to "'.$connection->getSocket()->getAddress().'" using "'.$this->getCryptName($crypt).'".');
+                    } else {
+                        break;
+                    }
+                }
             }
             $connection->resetStreams();
             $connection->connect();
+        }
+    }
+
+    /**
+     * TLS failed.
+     *
+     * @param XMLEvent $event
+     * @throws StreamErrorException
+     */
+    public function failure(XMLEvent $event)
+    {
+        if (false === $event->isStartTag()) {
+            $this->blocking = false;
+            throw StreamErrorException::createFromEvent($event);
         }
     }
 
@@ -108,5 +135,43 @@ class StartTls extends AbstractEventListener implements BlockingEventListenerInt
     public function isBlocking()
     {
         return $this->blocking;
+    }
+
+    protected function getCryptName($crypt)
+    {
+        switch ($crypt) {
+            case STREAM_CRYPTO_METHOD_ANY_CLIENT:
+                return 'STREAM_CRYPTO_METHOD_ANY_CLIENT';
+            case STREAM_CRYPTO_METHOD_SSLv2_CLIENT:
+                return 'STREAM_CRYPTO_METHOD_SSLv2_CLIENT';
+            case STREAM_CRYPTO_METHOD_SSLv3_CLIENT:
+                return 'STREAM_CRYPTO_METHOD_SSLv3_CLIENT';
+            case STREAM_CRYPTO_METHOD_SSLv23_CLIENT:
+                return 'STREAM_CRYPTO_METHOD_SSLv23_CLIENT';
+            case STREAM_CRYPTO_METHOD_TLS_CLIENT:
+                return 'STREAM_CRYPTO_METHOD_TLS_CLIENT';
+            case STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT:
+                return 'STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT';
+            case STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT:
+                return 'STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT';
+            case STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT:
+                return 'STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT';
+            case STREAM_CRYPTO_METHOD_ANY_SERVER:
+                return 'STREAM_CRYPTO_METHOD_ANY_SERVER';
+            case STREAM_CRYPTO_METHOD_SSLv2_SERVER:
+                return 'STREAM_CRYPTO_METHOD_SSLv2_SERVER';
+            case STREAM_CRYPTO_METHOD_SSLv3_SERVER:
+                return 'STREAM_CRYPTO_METHOD_SSLv3_SERVER';
+            case STREAM_CRYPTO_METHOD_SSLv23_SERVER:
+                return 'STREAM_CRYPTO_METHOD_SSLv23_SERVER';
+            case STREAM_CRYPTO_METHOD_TLS_SERVER:
+                return 'STREAM_CRYPTO_METHOD_TLS_SERVER';
+            case STREAM_CRYPTO_METHOD_TLSv1_0_SERVER:
+                return 'STREAM_CRYPTO_METHOD_TLSv1_0_SERVER';
+            case STREAM_CRYPTO_METHOD_TLSv1_1_SERVER:
+                return 'STREAM_CRYPTO_METHOD_TLSv1_1_SERVER';
+            case STREAM_CRYPTO_METHOD_TLSv1_2_SERVER:
+                return 'STREAM_CRYPTO_METHOD_TLSv1_2_SERVER';
+        }
     }
 }

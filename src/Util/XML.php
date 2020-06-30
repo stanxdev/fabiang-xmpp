@@ -100,7 +100,7 @@ class XML
      */
     public static function generateId()
     {
-        return static::quote('fabiang_xmpp_' . uniqid());
+        return static::quote('fabiang_xmpp_' . rand());
     }
 
     /**
