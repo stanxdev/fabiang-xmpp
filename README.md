@@ -1,4 +1,4 @@
-# fabiang/xmpp
+# stanx/fabiang-xmpp
 
 Library for XMPP protocol connections (Jabber) for PHP.
 
@@ -13,7 +13,7 @@ Library for XMPP protocol connections (Jabber) for PHP.
 
 ## SYSTEM REQUIREMENTS
 
-- PHP minimum 5.6 or minimum 7.0
+- PHP >= 7.0
 - psr/log
 - (optional) psr/log-implementation - like monolog/monolog for logging
 
@@ -22,7 +22,7 @@ Library for XMPP protocol connections (Jabber) for PHP.
 New to Composer? Read the [introduction](https://getcomposer.org/doc/00-intro.md#introduction). Add the following to your composer file:
 
 ```bash
-composer require fabiang/xmpp
+composer require stanx/fabiang-xmpp
 ```
 
 ## DOCUMENTATION
@@ -33,7 +33,8 @@ This library uses an object to hold options:
 use Fabiang\Xmpp\Options;
 $options = new Options($address);
 $options->setUsername($username)
-    ->setPassword($password);
+        ->setPassword($password)
+        ->setTimeout(10);
 ```
 
 The server address must be in the format `tcp://myjabber.com:5222`.  
@@ -69,7 +70,7 @@ $client->send(new Presence);
 // send a message to another user
 $message = new Message;
 $message->setMessage('test')
-    ->setTo('nickname@myjabber.com')
+        ->setTo('nickname@myjabber.com');
 $client->send($message);
 
 // join a channel
@@ -93,26 +94,4 @@ After all you should disconnect:
 $client->disconnect();
 ```
 
-## DEVELOPING
-
-If you like this library and you want to contribute, make sure the unit-tests and integration tests are running.
-Composer will help you to install the right version of PHPUnit and [Behat](http://behat.org/).
-
-    composer install
-
-After that:
-
-    ./vendor/bin/phpunit
-    ./vendor/bin/behat
-
-New features should always tested with Behat.
-
-## LICENSE
-
 BSD-2-Clause. See the [LICENSE](LICENSE.md).
-
-## TODO
-    
-- Better integration of channels
-- Factory method for server addresses
-- improve documentation
