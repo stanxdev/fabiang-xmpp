@@ -76,15 +76,15 @@ $client->send($message);
 // join a channel
 $channel = new Presence;
 $channel->setTo('channelname@conference.myjabber.com')
-    ->setPassword('channelpassword')
-    ->setNickName('mynick');
+        ->setPassword('channelpassword')
+        ->setNickName('mynick');
 $client->send($channel);
 
 // send a message to the above channel
 $message = new Message;
 $message->setMessage('test')
-    ->setTo('channelname@conference.myjabber.com')
-    ->setType(Message::TYPE_GROUPCHAT);
+        ->setTo('channelname@conference.myjabber.com')
+        ->setType(Message::TYPE_GROUPCHAT);
 $client->send($message);
 ```
 
